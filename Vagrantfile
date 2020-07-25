@@ -30,10 +30,10 @@ Host #{WORKER_PREFIX}*
    UserKnownHostsFile=/dev/null
 EOF
 #populate /etc/hosts
-echo #{MAIN_NODE_IP} #{MAIN_NODE} | sudo tee -a /etc/hosts &>/dev/null
+echo #{MAIN_NODE_IP} #{MAIN_NODE}.foreops.com | sudo tee -a /etc/hosts &>/dev/null
 for x in {21..#{20+NUM_WORKERS}}; do
   grep #{PRIVATE_NET}.${x} /etc/hosts &>/dev/null || {
-      echo #{PRIVATE_NET}.${x} #{WORKER_PREFIX}${x##?} | sudo tee -a /etc/hosts &>/dev/null
+      echo #{PRIVATE_NET}.${x} #{WORKER_PREFIX}${x##?}.foreops.com | sudo tee -a /etc/hosts &>/dev/null
   }
 done
 #end script
@@ -55,8 +55,8 @@ Vagrant.configure("2") do |config|
       node.vm.provider "virtualbox" do |vb|
         vb.name = vm_name
         vb.gui = false
-        vb.memory = 4096
-        vb.cpus = 2
+        vb.memory = 8192
+        vb.cpus = 4
       end
       node.vm.provision "shell", privileged: false, inline: <<-SHELL
         sudo add-apt-repository ppa:deadsnakes/ppa -y
@@ -82,8 +82,8 @@ Vagrant.configure("2") do |config|
     node.vm.provider "virtualbox" do |vb|
       vb.name = "#{MAIN_NODE}"
       vb.gui = false
-      vb.memory = 2048
-      vb.cpus = 2
+      vb.memory = 4096
+      vb.cpus = 4
     end
 
     node.vm.provision "shell", privileged: false, inline: <<-SHELL 

@@ -1,5 +1,5 @@
 WORKER_PREFIX="worker"
-NUM_WORKERS=2
+NUM_WORKERS=3
 PRIVATE_NET="172.28.128"
 MAIN_NODE="main-node"
 MAIN_NODE_IP=PRIVATE_NET+".10"
@@ -30,10 +30,10 @@ Host #{WORKER_PREFIX}*
    UserKnownHostsFile=/dev/null
 EOF
 #populate /etc/hosts
-echo #{MAIN_NODE_IP} #{MAIN_NODE}.foreops.com | sudo tee -a /etc/hosts &>/dev/null
+echo #{MAIN_NODE_IP} #{MAIN_NODE} #{MAIN_NODE}.foreops.com | sudo tee -a /etc/hosts &>/dev/null
 for x in {21..#{20+NUM_WORKERS}}; do
   grep #{PRIVATE_NET}.${x} /etc/hosts &>/dev/null || {
-      echo #{PRIVATE_NET}.${x} #{WORKER_PREFIX}${x##?}.foreops.com | sudo tee -a /etc/hosts &>/dev/null
+      echo #{PRIVATE_NET}.${x} #{WORKER_PREFIX}${x##?} #{WORKER_PREFIX}${x##?}.foreops.com | sudo tee -a /etc/hosts &>/dev/null
   }
 done
 #end script
@@ -99,9 +99,9 @@ Vagrant.configure("2") do |config|
       echo spark.master spark://#{MAIN_NODE_IP}:7077 >> /home/vagrant/spark/conf/spark-defaults.conf
       echo SPARK_LOCAL_IP=#{MAIN_NODE_IP} >> /home/vagrant/spark/conf/spark-env.sh
       echo SPARK_MASTER_HOST=#{MAIN_NODE_IP} >> /home/vagrant/spark/conf/spark-env.sh
-      echo #{MAIN_NODE} | tee -a /home/vagrant/spark/conf/slaves &>/dev/null
+      echo #{MAIN_NODE}.foreops.com | tee -a /home/vagrant/spark/conf/slaves &>/dev/null
       for x in {1..#{NUM_WORKERS}}; do
-          echo #{WORKER_PREFIX}${x} | tee -a /home/vagrant/spark/conf/slaves &>/dev/null
+          echo #{WORKER_PREFIX}${x}.foreops.com | tee -a /home/vagrant/spark/conf/slaves &>/dev/null
       done
       sudo cp /vagrant/spark-init.service /etc/systemd/system
       sudo systemctl daemon-reload
